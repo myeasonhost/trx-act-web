@@ -1,30 +1,13 @@
 <template>
   <div id="app">
-    <!-- <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div> -->
-    <!-- <transition :name="transitionName" mode="out-in"> -->
     <keep-alive>
       <router-view class="transitionBody"></router-view>
     </keep-alive>
-    <!-- </transition> -->
   </div>
 </template>
 <script>
 export default {
-  data() {
-    return {
-      transitionName: "transitionRight"
-    };
-  },
-  watch: {
-    $route(to, from) {
-      const arr = ["home", "type", "activity", "mine"];
-      const compare = arr.indexOf(to.path) > arr.indexOf(from.path);
-      this.transitionName = compare ? "transitionLeft" : "transitionRight";
-    }
-  }
+
 };
 </script>
 <style lang="scss">
@@ -76,16 +59,4 @@ export default {
   -webkit-transform: translate(-100%, 0);
   transform: translate(-100%, 0);
 }
-// .fadee-enter,
-// .fadee-leave-active {
-//   -webkit-transform: translate(100%, 0);
-//   transform: translate(100%, 0);
-// }
-
-// .fadee-leave-active,
-// .fadee-enter-active {
-//   opacity: 0;
-//   -webkit-transform: translate(-100%, 0);
-//   transform: translate(-100% 0);
-// }
 </style>
