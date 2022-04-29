@@ -13,7 +13,7 @@
           USDT
         </div>
         <div class="submit">
-          <a class="btnConnect" href="javascript:;">Connect wallet</a>
+          <a class="btnConnect" @click="connectionWallet">Connect wallet</a>
         </div>
       </div>
     </div>
@@ -353,6 +353,7 @@
 
 <script>
 // @ is an alias to /src
+const TronWeb = require('tronweb')
 
 export default {
   name: "Home",
@@ -363,6 +364,11 @@ export default {
       isActive: 1,
       activeNames: ["0"]
     };
+  },
+  methods:{
+    connectionWallet(){
+      console.info("Aaaaaa");
+    }
   }
 };
 </script>
