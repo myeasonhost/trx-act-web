@@ -34,14 +34,13 @@ export default {
 }
 
 .transitionBody {
-  transition: all 0.4s; /*定义动画的时间和过渡效果*/
+  transition: all 0.4s;
   width: 100%;
 }
 .transitionLeft-enter,
 .transitionLeft-leave-active {
   -webkit-transform: translate(-100%, 0);
   transform: translate(-100%, 0);
-  /*当左滑进入右滑进入过渡动画*/
 }
 .transitionLeft-leave,
 .transitionLeft-enter-active {
@@ -53,7 +52,6 @@ export default {
 .transitionRight-leave-active {
   -webkit-transform: translate(100%, 0);
   transform: translate(100%, 0);
-  /*当左滑进入右滑进入过渡动画*/
 }
 .transitionRight-leave,
 .transitionRight-enter-active {

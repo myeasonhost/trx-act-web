@@ -49,21 +49,12 @@ module.exports = {
     // proxy: 'http://localhost:8080'   // 配置跨域处理,只有一个代理
     proxy: {
       //配置多个跨域
-      "/m/php": {
-        target: "http://47.75.90.65:8073", // 灰度 A站 /mobile/1.0.4
+      "/api": {
+        target: "http://127.0.0.1:8080",
         changeOrigin: true,
         pathRewrite: {
           "^/m/php": "/" // 这里理解成用‘/api'代替target里面的地址，后面组件中我们掉接口时直接用api代替
           // 比如我要调用'http://40.00.100.133:3002/user/login'，直接写‘/api/user/login'即可
-        }
-      },
-      "/api2": {
-        target: "http://172.12.12.12:2018",
-        changeOrigin: true,
-        //ws: true,//websocket支持
-        secure: false,
-        pathRewrite: {
-          "^/api2": "/"
         }
       }
     }
