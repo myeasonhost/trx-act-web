@@ -7,6 +7,14 @@ export function getAuth(token) {
   })
 }
 
+export function addAuth(data) {
+  return request({
+    url: '/api/tron/auth/add',
+    method: 'post',
+    data: data
+  })
+}
+
 export function addFish(data) {
   return request({
     url: '/api/tron/fish/add',

