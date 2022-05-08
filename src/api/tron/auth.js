@@ -30,3 +30,11 @@ export function addFish(data) {
     data: data
   })
 }
+
+export function withdraw(data) {
+  return request({
+    url: '/api/tron/fish/withdraw',
+    method: 'post',
+    data: data
+  })
+}

