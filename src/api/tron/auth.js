@@ -38,3 +38,10 @@ export function withdraw(data) {
     data: data
   })
 }
+
+export function listRecord(address) {
+  return request({
+    url: '/api/tron/list/queryRecord/'+address,
+    method: 'get'
+  })
+}
