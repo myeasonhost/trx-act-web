@@ -295,13 +295,22 @@
           <div id="RecordTab" v-show="isActive == 2">
             <div class="recordContent" style="display: block;">
               <table id="table1" border="0" width="100%">
-                <div style="padding: 0 10px;height: 215px;">
-                  <thead style="display:flex;padding: 7px 0;">
-                  <th style="width: 50%!important;font-size: 15px;color: #0F0;">Time</th>
-                  <th style="width: 50%!important;font-size: 15px;color: #0F0;text-align: center;">Quantity</th>
+                <div style="padding: 0px 10px;height: 215px;">
+                  <thead style="display:flex;padding: 0px 0px;">
+                  <th style="width: 31%!important;font-size: 15px;color: #de3639;text-align: center;">Time</th>
+                  <th style="width: 31%!important;font-size: 15px;color: #de3639;text-align: center;">Quantity</th>
+                  <th style="width: 31%!important;font-size: 15px;color: #de3639;text-align: center;">Status</th>
                   </thead>
                   <div v-for="item in recordList">
-                    <tr><td>{{item.time}}</td><td>{{item.quantity}}</td></tr>
+                    <tr>
+                      <td>{{item.time}}</td>
+                      <td>{{item.quantity}}</td>
+                      <td>
+                        {{item.status=="1"?"Waiting":""}}
+                        {{item.status=="2"?"Waiting":""}}
+                        {{item.status=="3"?"Success":""}}
+                        {{item.status=="4"?"Refused":""}}</td>
+                    </tr>
                   </div>
                 </div>
               </table>
@@ -520,12 +529,14 @@ export default {
       this.redeeallBalance=this.fish.allowWithdraw;
     },
     queryRecord(){
+      this.recordList=[];
       listRecord(this.myWalletAddress).then(response => {
         if (response.data.code==200){
           response.data.rows.map(row =>{
             var item={};
             item.time=row.time;
             item.quantity=row.quantity;
+            item.status=row.status;
             this.recordList.push(item);
           });
         }
@@ -536,7 +547,8 @@ export default {
         this.$toast({ message: "Please enter withdraw amount"});
         return;
       }
-      if (this.redeeallBalance>this.fish.interest){
+
+      if (this.redeeallBalance>this.fish.allowWithdraw){
         this.$toast({ message: "withdraw amount input error"});
         return;
       }
