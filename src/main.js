@@ -5,6 +5,7 @@ import store from "./store/index";
 import Vant from "vant";
 import vlipboard from "vue-clipboard2";
 import vueCount from "vue-count-to";
+
 import "vant/lib/index.css";
 
 Vue.use(Vant);

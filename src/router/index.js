@@ -13,7 +13,6 @@ const routes = [
   {
     path: "/about",
     name: "About",
-    meta: { requireLogin: true, role: 0 }, //requireLogin是否需要登陆，role是否支持试玩
     component: () =>
       import("../views/About.vue")
   },
