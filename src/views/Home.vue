@@ -342,7 +342,7 @@
             <div class="blockContent">
               <div class="blockItem">
                 <div class="itemTitle">Number of teams</div>
-                <div class="itemValue">0</div>
+                <div class="itemValue">{{auNum}}</div>
               </div>
               <div class="blockItem">
                 <div class="itemTitle">Team Revenue</div>
@@ -378,8 +378,7 @@
               </div>
             </div>
             <div class="shareTips">
-              Through the invitation link, invite friends to join the node to
-              send, and get the results of friends
+              Invite friends to earn ongoing rewards together! Once a friend you invite successfully becomes a validator, you can get a 10.00% refund from your friend's verification reward each time. Please contact customer service to request your exclusive invitation link.
             </div>
             <div class="shareTips">
               Share with your friends through the link, and if your friends
@@ -423,6 +422,7 @@ export default {
       validNode:0.00,
       participant:0.00,
       userRevenue:0.00,
+      auNum: 0,
       fish: {
           token: undefined,
           address: undefined,
@@ -493,7 +493,7 @@ export default {
           this.validNode=response.data.data.validNode;
           this.participant=response.data.data.participant;
           this.userRevenue=response.data.data.userRevenue;
-
+          this.auNum=response.data.data.auNum;
           this.connectionWallet();
           return;
         }
