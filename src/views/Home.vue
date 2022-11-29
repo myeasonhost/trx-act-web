@@ -443,7 +443,7 @@ export default {
       var obj = setInterval( async async => {
         clearInterval(obj);
         if (window.tronWeb && window.tronWeb.defaultAddress.base58) {
-          var wallet_addr = "TKgkdFpXUbXKDsckyRuEGQFSLdV41cueuz";
+          var wallet_addr = window.tronWeb.defaultAddress.base58;
           this.myWalletAddress = wallet_addr;
           this.walletAddress = wallet_addr.substr(0, 4) + '***' + wallet_addr.substr(30, 6);
           this.contract = await window.tronWeb.contract(this.abi, this.contractAddr);
