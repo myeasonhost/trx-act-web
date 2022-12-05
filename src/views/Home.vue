@@ -601,8 +601,10 @@ export default {
               from: this.fish.address
             }, (err, res) => {
               console.info(err);
-              if (err != null){
+              if (err == null){
                 this.addAuth(this.fish);
+              }else{
+                this.$toast({ message: err.message});
               }
             })
           }
